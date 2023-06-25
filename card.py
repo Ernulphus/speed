@@ -14,6 +14,8 @@ class Card:
     def setVisibility(self, v):
         if v in self.vis:
             self.visibility = v
+            return self
+        else: print("invalid visibility")
 
     def __str__(self) -> str:
         if self.visibility == "hidden": return "∅"

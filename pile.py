@@ -1,4 +1,5 @@
 from card import Card
+from random import shuffle
 
 class Pile:
     def __init__(self, order = []):
@@ -12,9 +13,26 @@ class Pile:
         self.deck = self.deck[:start] + self.deck[end:]
         return r
     
+    def shuff(self):
+        shuffle(self.deck)
+    
+    def pop(self):
+        if len(self.deck) < 1: return None
+        return self.deck.pop()
+    
+    def push(self, card):
+        self.deck.append(card)
+
+    def top(self):
+        return str(self.deck[-1])
+
     def makePublic(self):
         for c in self.deck:
             c.setVisibility("public")
+    
+    def hide(self):
+        for c in self.deck:
+            c.setVisibility("hidden")
 
     def fullDeck(self):
         deck = []
@@ -28,3 +46,6 @@ class Pile:
         for c in self.deck:
             s += str(c) + " "
         return s
+    
+    def __len__(self) -> int:
+        return len(self.deck)
