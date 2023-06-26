@@ -1,3 +1,5 @@
+import pygame
+
 class Card:
 
     def __init__(self, rank, suit) -> None:
@@ -18,7 +20,7 @@ class Card:
         else: print("invalid visibility")
 
     def __str__(self) -> str:
-        if self.visibility == "hidden": return "∅"
+        if self.visibility == "hidden": return "||"
 
         s = ""
         if self.rank == 11: s += "J"
@@ -27,12 +29,12 @@ class Card:
         elif self.rank == 1: s += "A"
         elif self.rank == 10: s += "X"
         elif self.rank > 1 and self.rank < 11: s += str(self.rank)
-        else: s += "∅"
+        else: s += "||"
 
         if self.suit == "spades": s += "♠"
-        if self.suit == "hearts": s += "♡"
+        if self.suit == "hearts": s += "♥"
         if self.suit == "clubs" : s += "♣"
-        if self.suit == "diamonds": s += "♢ "
+        if self.suit == "diamonds": s += "♦"
     
         return s
     

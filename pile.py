@@ -13,6 +13,9 @@ class Pile:
         self.deck = self.deck[:start] + self.deck[end:]
         return r
     
+    def readCard(self, index=-1):
+        return str(self.deck[index])
+    
     def shuff(self):
         shuffle(self.deck)
     
