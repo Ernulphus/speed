@@ -25,11 +25,21 @@ p1Hand.makePublic()
 
 font = pygame.font.SysFont('couriernew', 45)
 
+cardSelect = ['q', 'w', 'e', 'r', 'a', 's', 'd']
+PLAYDUTCH1, PLAYDUTCH2 = 'j', 'k'
+DRAW = ' '
+selectedIndex = -1
+
 
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.KEYDOWN:
+            if event.unicode in cardSelect:
+                selectedIndex = cardSelect.index(event.unicode)
+
+        
 
     # Hand loading
     p1HandRender = [font.render(str(p1Hand.readCard(i)), True, "black", "white") for i in range(len(p1Hand))]
@@ -71,6 +81,12 @@ while running:
     screen.blit(dutch2Render, dutch2Rect)
     screen.blit(p1DeckRender, p1DeckRect)
     screen.blit(p2DeckRender, p2DeckRect)
+
+    # Card selector
+    if selectedIndex > -1:
+        selectorCornerNWx, selectorCornerNWy = (X // 4) - 30 + (selectedIndex * 100), (Y // 2) + 170
+        pygame.draw.rect(screen, "lightgreen", pygame.Rect(selectorCornerNWx, selectorCornerNWy, 60, 60), 5)
+        pygame.display.flip()
 
     pygame.display.update()
 
