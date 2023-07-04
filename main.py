@@ -32,7 +32,7 @@ PLAYDUTCH1, PLAYDUTCH2 = 'j', 'k'
 DRAW = ' '
 CLEAR = ';'
 selectedIndex = -1
-AIspeed = 2500
+AIspeed = 2250
 AImoveCounter = AIspeed
 stuck = False
 
@@ -58,9 +58,11 @@ def gameEnd():
         if len(p1Hand) > len(p2Hand):
             print("Player 2 wins!")
             return True
-        else:
+        elif len(p1Hand) < len(p2Hand):
             print("Player 1 wins!")
             return True
+        else:
+            print("Drawn Game :/")
     return False
 
 while running and not gameEnd():
