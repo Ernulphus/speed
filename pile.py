@@ -16,12 +16,15 @@ class Pile:
     def readCard(self, index=-1):
         return str(self.deck[index])
     
+    def readCardRank(self, index=-1):
+        return self.deck[index].rank
+    
     def shuff(self):
         shuffle(self.deck)
     
-    def pop(self):
+    def pop(self, index = -1):
         if len(self.deck) < 1: return None
-        return self.deck.pop()
+        return self.deck.pop(index)
     
     def push(self, card):
         self.deck.append(card)

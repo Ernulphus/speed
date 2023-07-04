@@ -38,8 +38,20 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.unicode in cardSelect:
                 selectedIndex = cardSelect.index(event.unicode)
+            elif event.unicode == PLAYDUTCH1 and selectedIndex > -1:
+                if (p1Hand.readCardRank(selectedIndex) + 1) % 13 == dutch1.readCardRank() or \
+                    (p1Hand.readCardRank(selectedIndex) - 1) % 13 == dutch1.readCardRank():
+                    # Move selected card to top of dutch pile
+                    dutch1.push(p1Hand.pop(selectedIndex).setVisibility("public"))
+            elif event.unicode == PLAYDUTCH2 and selectedIndex > -1:
+                if (p1Hand.readCardRank(selectedIndex) + 1) % 13 == dutch2.readCardRank() or \
+                    (p1Hand.readCardRank(selectedIndex) - 1) % 13 == dutch2.readCardRank():
+                    # Move selected card to top of dutch pile
+                    dutch2.push(p1Hand.pop(selectedIndex).setVisibility("public"))
+            elif event.unicode == DRAW and len(p1Hand) < 7:
+                p1Hand.push(p1Deck.pop().setVisibility("player1"))
 
-        
+    # AI player
 
     # Hand loading
     p1HandRender = [font.render(str(p1Hand.readCard(i)), True, "black", "white") for i in range(len(p1Hand))]
@@ -49,7 +61,7 @@ while running:
 
     p2HandRender = [font.render(str(p2Hand.readCard(i)), True, "black", "white") for i in range(len(p2Hand))]
     p2textRect = [p2HandRender[i].get_rect() for i in range(len(p2HandRender))]
-    for i in range(len(p1textRect)):
+    for i in range(len(p2textRect)):
         p2textRect[i].center = ((X // 4) + (i * 100), (Y // 2) - 200)
 
     # Dutch piles loading
@@ -82,7 +94,7 @@ while running:
     screen.blit(p1DeckRender, p1DeckRect)
     screen.blit(p2DeckRender, p2DeckRect)
 
-    # Card selector
+    # Card selector rectangle
     if selectedIndex > -1:
         selectorCornerNWx, selectorCornerNWy = (X // 4) - 30 + (selectedIndex * 100), (Y // 2) + 170
         pygame.draw.rect(screen, "lightgreen", pygame.Rect(selectorCornerNWx, selectorCornerNWy, 60, 60), 5)
