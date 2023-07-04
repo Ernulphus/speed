@@ -21,15 +21,31 @@ p2Hand = Pile(p2Deck.getCards(-8, -1))
 dutch1 = Pile([p1Deck.pop().setVisibility("public")])
 dutch2 = Pile([p2Deck.pop().setVisibility("public")])
 
+discard = Pile([])
+
 p1Hand.makePublic()
 
 font = pygame.font.SysFont('couriernew', 45)
 
-cardSelect = ['q', 'w', 'e', 'r', 'a', 's', 'd']
+cardSelect = ['a', 's', 'd', 'f', 'w', 'e', 'r']
 PLAYDUTCH1, PLAYDUTCH2 = 'j', 'k'
 DRAW = ' '
+CLEAR = ';'
 selectedIndex = -1
+AIspeed = 2500
+AImoveCounter = AIspeed
+stuck = False
 
+def adjacent(rank1, rank2):
+    return (rank1 - rank2) % 13 == 12 or (rank1 - rank2) % 13 == 1
+
+def hasPlayableCard(pile):
+    for i in range(len(pile)):
+        if adjacent(pile.readCardRank(i), dutch1.readCardRank()):
+            return True
+        if adjacent(pile.readCardRank(i), dutch2.readCardRank()):
+            return True
+    return False
 
 while running:
     for event in pygame.event.get():
@@ -38,20 +54,42 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.unicode in cardSelect:
                 selectedIndex = cardSelect.index(event.unicode)
+                if selectedIndex >= len(p1Hand):
+                    selectedIndex = len(p1Hand) - 1
             elif event.unicode == PLAYDUTCH1 and selectedIndex > -1:
-                if (p1Hand.readCardRank(selectedIndex) + 1) % 13 == dutch1.readCardRank() or \
-                    (p1Hand.readCardRank(selectedIndex) - 1) % 13 == dutch1.readCardRank():
+                if adjacent(p1Hand.readCardRank(selectedIndex), dutch1.readCardRank()):
                     # Move selected card to top of dutch pile
                     dutch1.push(p1Hand.pop(selectedIndex).setVisibility("public"))
+                    selectedIndex -= 1
             elif event.unicode == PLAYDUTCH2 and selectedIndex > -1:
-                if (p1Hand.readCardRank(selectedIndex) + 1) % 13 == dutch2.readCardRank() or \
-                    (p1Hand.readCardRank(selectedIndex) - 1) % 13 == dutch2.readCardRank():
+                if adjacent(p1Hand.readCardRank(selectedIndex), dutch2.readCardRank()):
                     # Move selected card to top of dutch pile
                     dutch2.push(p1Hand.pop(selectedIndex).setVisibility("public"))
+                    selectedIndex -= 1
             elif event.unicode == DRAW and len(p1Hand) < 7:
                 p1Hand.push(p1Deck.pop().setVisibility("player1"))
+            elif event.unicode == CLEAR and stuck:
+                discard = discard + dutch1.getCards() + dutch2.getCards
+                dutch1.push(p1Deck.pop().setVisibility("public"))
+                dutch2.push(p2Deck.pop().setVisibility("public"))
 
     # AI player
+    if AImoveCounter > 0:
+        AImoveCounter -= 1
+    else:
+        for card in range(len(p2Hand)):
+            if adjacent(p2Hand.readCardRank(card), dutch1.readCardRank()):
+                dutch1.push(p2Hand.pop(card).setVisibility("public"))
+                break
+            elif adjacent(p2Hand.readCardRank(card), dutch2.readCardRank()):
+                dutch2.push(p2Hand.pop(card).setVisibility("public"))
+                break
+        AImoveCounter = AIspeed
+
+    if hasPlayableCard(p1Hand) or hasPlayableCard(p2Hand):
+        stuck = False
+    else:
+        stuck = True
 
     # Hand loading
     p1HandRender = [font.render(str(p1Hand.readCard(i)), True, "black", "white") for i in range(len(p1Hand))]
@@ -94,6 +132,13 @@ while running:
     screen.blit(p1DeckRender, p1DeckRect)
     screen.blit(p2DeckRender, p2DeckRect)
 
+    if stuck:
+        stuckText = font.render("Stuck.", True, "black", "lightgray")
+        stuckTextRect = stuckText.get_rect()
+        stuckTextRect.center = (X // 10, Y // 7)
+        screen.blit(stuckText, stuckTextRect)
+    
+
     # Card selector rectangle
     if selectedIndex > -1:
         selectorCornerNWx, selectorCornerNWy = (X // 4) - 30 + (selectedIndex * 100), (Y // 2) + 170
@@ -101,9 +146,3 @@ while running:
         pygame.display.flip()
 
     pygame.display.update()
-
-print("P2 Hand", p2Hand)
-print("P2 Deck:", len(p2Deck), "cards")
-print("\t", dutch1.top(), dutch2.top())
-print("P1 Deck:", len(p1Deck), "cards")
-print("P1 Hand", p1Hand)

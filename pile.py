@@ -14,7 +14,9 @@ class Pile:
         return r
     
     def readCard(self, index=-1):
-        return str(self.deck[index])
+        if index < len(self):
+            return str(self.deck[index])
+        else: return " "
     
     def readCardRank(self, index=-1):
         return self.deck[index].rank
@@ -55,3 +57,7 @@ class Pile:
     
     def __len__(self) -> int:
         return len(self.deck)
+    
+    def __add__(self, cards):
+        self.deck.append(cards)
+        return self
