@@ -14,7 +14,7 @@ class Pile:
         return r
     
     def readCard(self, index=-1):
-        if index < len(self):
+        if index < len(self) and len(self) > 0:
             return str(self.deck[index])
         else: return " "
     

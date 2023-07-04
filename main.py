@@ -47,7 +47,23 @@ def hasPlayableCard(pile):
             return True
     return False
 
-while running:
+def gameEnd():
+    if len(p1Deck) + len(p1Hand) < 1:
+        print("Player 1 wins!")
+        return True
+    if len(p2Deck) + len(p2Hand) < 1:
+        print("Player 2 wins!")
+        return True
+    if stuck and len(p1Deck) < 1 and len(p2Deck) < 1:
+        if len(p1Hand) > len(p2Hand):
+            print("Player 2 wins!")
+            return True
+        else:
+            print("Player 1 wins!")
+            return True
+    return False
+
+while running and not gameEnd():
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -55,7 +71,8 @@ while running:
             if event.unicode in cardSelect:
                 selectedIndex = cardSelect.index(event.unicode)
                 if selectedIndex >= len(p1Hand):
-                    selectedIndex = len(p1Hand) - 1
+                    selectedIndex = len(p1Hand) - 1 # Cap selection to last card in hand
+            
             elif event.unicode == PLAYDUTCH1 and selectedIndex > -1:
                 if adjacent(p1Hand.readCardRank(selectedIndex), dutch1.readCardRank()):
                     # Move selected card to top of dutch pile
@@ -66,17 +83,30 @@ while running:
                     # Move selected card to top of dutch pile
                     dutch2.push(p1Hand.pop(selectedIndex).setVisibility("public"))
                     selectedIndex -= 1
+            
             elif event.unicode == DRAW and len(p1Hand) < 7:
-                p1Hand.push(p1Deck.pop().setVisibility("player1"))
+                if len(p1Deck) > 0:
+                    p1Hand.push(p1Deck.pop().setVisibility("player1"))
+
             elif event.unicode == CLEAR and stuck:
                 discard = discard + dutch1.getCards() + dutch2.getCards
-                dutch1.push(p1Deck.pop().setVisibility("public"))
-                dutch2.push(p2Deck.pop().setVisibility("public"))
+                if len(p1Deck) > 0:
+                    dutch1.push(p1Deck.pop().setVisibility("public"))
+                else:
+                    dutch1.push(p2Deck.pop().setVisibility("public"))
+                if len(p2Deck) > 0:
+                    dutch2.push(p2Deck.pop().setVisibility("public"))
+                else:
+                    dutch2.push(p1Deck.pop().setVisibility("public"))
+                
+
 
     # AI player
     if AImoveCounter > 0:
         AImoveCounter -= 1
     else:
+        if not hasPlayableCard(p2Hand) and len(p2Hand) < 7 and len(p2Deck) > 0:
+            p2Hand.push(p2Deck.pop().setVisibility("player2"))
         for card in range(len(p2Hand)):
             if adjacent(p2Hand.readCardRank(card), dutch1.readCardRank()):
                 dutch1.push(p2Hand.pop(card).setVisibility("public"))

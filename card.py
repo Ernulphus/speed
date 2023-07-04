@@ -20,7 +20,7 @@ class Card:
         else: print("invalid visibility")
 
     def __str__(self) -> str:
-        if self.visibility == "hidden": return "||"
+        if self.visibility == "hidden" or self.visibility == "player2": return "||"
 
         s = ""
         if self.rank == 11: s += "J"
