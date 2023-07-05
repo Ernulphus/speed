@@ -9,28 +9,13 @@ clock = pygame.time.Clock()
 running = True
 dt = 0
 
-deck = Pile()
-deck.shuff()
-
-p1Deck = Pile(deck.getCards(0,26))
-p2Deck = deck
-
-p1Hand = Pile(p1Deck.getCards(-8, -1))
-p2Hand = Pile(p2Deck.getCards(-8, -1))
-
-dutch1 = Pile([p1Deck.pop().setVisibility("public")])
-dutch2 = Pile([p2Deck.pop().setVisibility("public")])
-
-discard = Pile([])
-
-p1Hand.makePublic()
-
 font = pygame.font.SysFont('couriernew', 45)
 
 cardSelect = ['a', 's', 'd', 'f', 'w', 'e', 'r']
 PLAYDUTCH1, PLAYDUTCH2 = 'j', 'k'
 DRAW = ' '
 CLEAR = ';'
+RESTART = 13
 selectedIndex = -1
 AIspeed = 2250
 AImoveCounter = AIspeed
@@ -49,23 +34,32 @@ def hasPlayableCard(pile):
 
 def gameEnd():
     if len(p1Deck) + len(p1Hand) < 1:
-        print("Player 1 wins!")
-        return True
+        return "Player 1 wins!"
     if len(p2Deck) + len(p2Hand) < 1:
-        print("Player 2 wins!")
-        return True
+        return "Player 2 wins!"
     if stuck and len(p1Deck) < 1 and len(p2Deck) < 1:
         if len(p1Hand) > len(p2Hand):
-            print("Player 2 wins!")
-            return True
+            return "Player 2 wins!"
         elif len(p1Hand) < len(p2Hand):
-            print("Player 1 wins!")
-            return True
+            return "Player 1 wins!"
         else:
-            print("Drawn Game :/")
-    return False
+            return "Drawn Game :/"
+    return None
 
-while running and not gameEnd():
+
+deck = Pile()
+deck.shuff()
+p1Deck = Pile(deck.getCards(0,26))
+p2Deck = deck
+p1Hand = Pile(p1Deck.getCards(-8, -1))
+p2Hand = Pile(p2Deck.getCards(-8, -1))
+dutch1 = Pile([p1Deck.pop().setVisibility("public")])
+dutch2 = Pile([p2Deck.pop().setVisibility("public")])
+discard = Pile([])
+p1Hand.makePublic()
+
+while running:
+    gameEnd()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -79,12 +73,14 @@ while running and not gameEnd():
                 if adjacent(p1Hand.readCardRank(selectedIndex), dutch1.readCardRank()):
                     # Move selected card to top of dutch pile
                     dutch1.push(p1Hand.pop(selectedIndex).setVisibility("public"))
-                    selectedIndex -= 1
+                    if selectedIndex > 0:
+                        selectedIndex -= 1
             elif event.unicode == PLAYDUTCH2 and selectedIndex > -1:
                 if adjacent(p1Hand.readCardRank(selectedIndex), dutch2.readCardRank()):
                     # Move selected card to top of dutch pile
                     dutch2.push(p1Hand.pop(selectedIndex).setVisibility("public"))
-                    selectedIndex -= 1
+                    if selectedIndex > 0:
+                        selectedIndex -= 1
             
             elif event.unicode == DRAW and len(p1Hand) < 7:
                 if len(p1Deck) > 0:
@@ -94,16 +90,31 @@ while running and not gameEnd():
                 discard = discard + dutch1.getCards() + dutch2.getCards
                 if len(p1Deck) > 0:
                     dutch1.push(p1Deck.pop().setVisibility("public"))
-                else:
+                elif len(p2Deck) > 0:
                     dutch1.push(p2Deck.pop().setVisibility("public"))
                 if len(p2Deck) > 0:
                     dutch2.push(p2Deck.pop().setVisibility("public"))
-                else:
+                elif len(p1Deck) > 0:
                     dutch2.push(p1Deck.pop().setVisibility("public"))
-                
-
+            
+            elif event.key == RESTART and gameEnd():
+                deck = Pile()
+                deck.shuff()
+                p1Deck = Pile(deck.getCards(0,26))
+                p2Deck = deck
+                p1Hand = Pile(p1Deck.getCards(-8, -1))
+                p2Hand = Pile(p2Deck.getCards(-8, -1))
+                dutch1 = Pile([p1Deck.pop().setVisibility("public")])
+                dutch2 = Pile([p2Deck.pop().setVisibility("public")])
+                discard = Pile([])
+                p1Hand.makePublic()
+                continue
 
     # AI player
+    if AImoveCounter == AIspeed // 2:
+        if not hasPlayableCard(p2Hand) and len(p2Hand) < 7 and len(p2Deck) > 0:
+            p2Hand.push(p2Deck.pop().setVisibility("player2"))
+
     if AImoveCounter > 0:
         AImoveCounter -= 1
     else:
@@ -169,6 +180,13 @@ while running and not gameEnd():
         stuckTextRect = stuckText.get_rect()
         stuckTextRect.center = (X // 10, Y // 7)
         screen.blit(stuckText, stuckTextRect)
+
+    over = gameEnd()
+    if over:
+        overText = font.render(over, True, "black", "lightgray")
+        overTextRect = overText.get_rect()
+        overTextRect.center = (X // 6, Y // 3)
+        screen.blit(overText, overTextRect)
     
 
     # Card selector rectangle

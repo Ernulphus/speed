@@ -19,7 +19,9 @@ class Pile:
         else: return " "
     
     def readCardRank(self, index=-1):
-        return self.deck[index].rank
+        if index < len(self) and len(self) > 0:
+            return self.deck[index].rank
+        else: return 9999
     
     def shuff(self):
         shuffle(self.deck)
